@@ -1,0 +1,11 @@
+* git
+** github base flow
+*** generate ssh   : ssh-keygen
+*** add ssh to rep : github.com/account
+*** git clone git@github.com:slimcn/notebook.git
+*** git pull origin master
+*** edit
+*** git add
+*** git commit -m
+*** git push origin
+
