@@ -1,5 +1,57 @@
 * ruby
+** regular experition
+*** 表达式的一般规则:
+  /a/匹配字符a。
+  /\?/匹配特殊字符?。特殊字符包括^, $, ? , ., /, \, [, ], {, }, (, ), +, *.
+  .匹配任意字符，例如/a./匹配ab和ac。
+  /[ab]c/匹配ac和bc,[]之间代表范围。例如：/[a-z]/ , /[a-zA-Z0-9]/。
+  /[^a-zA-Z0-9]/匹配不在该范围内的字符串。
+  /[\d]/代表任意数字，/[\w]/代表任意字母，数字或者_，/[\s]/代表空白字符，包括空格，TAB和换行。
+  /[\D]/，/[\W]/，/[\S]/均为上述的否定情况。
+
+*** 高级规则：
+  ?代表0或1个字符。/Mrs?\.?/匹配"Mr"，"Mrs"，"Mr."，"Mrs."。
+  *代表0或多个字符。/Hello*/匹配"Hello","HelloJavaeye"。
+  +代表1或多个字符。/a+c/匹配："abc"，"abbdrec"等等。
+  /d{3}/匹配3个数字。
+  /d{1,10}/匹配1-10个数字。
+  /d{3,}/匹配3个数字以上。
+  /([A-Z]\d){5}/匹配首位是大写字母，后面4个是数字的字符串。
+** json
+*** JSON::parse(str_json) 将json string 转换为 json
 * rails
+** cache
+*** config
+**** 开启缓存
+     config.action_controller.perform_caching = true
+****
+**** store
+     ActionController::Base.fragment_cache_store = :memory_store
+     ActionController::Base.fragment_cache_store = :file_store, "/path/to/cache/directory"
+     ActionController::Base.fragment_cache_store = :drb_store, "druby://localhost:9192"
+     ActionController::Base.fragment_cache_store = :mem_cache_store, "localhost"
+
+     config.action_controller.page_cache_directory = RAILS_ROOT + "/public/cache/"
+
+*** 页面 page
+    1，需要cache的page对所有用户一致
+    2，需要cache的page对public可访问，不需要authentication
+
+    # controller.rb
+    caches_page :list, :show  # public/controller/list.html
+
+
+*** 动作 action
+*** 片段 fragment
+**** notice
+对象中有表单或者是rails的link_to_remote ajax等辅助方法时，要注意，因为rails生成的html中都有验证的随机数，所以如果把这些内容缓存的话，会报错 ActionController::InvalidAuthenticityToken，
+解决办法就是要么对该类内容不缓存，要么就是在控制器application.rb中取消rails的表单及post请求的自动验证功能，不过这样肯定不好的
+***** 有表单、ajax辅助方法 验证随机数错误 ActionController::InvalidAuthenticityToken
+*** model
+*** 参考
+    [[http://www.ibm.com/developerworks/cn/web/wa-rails1/][真实世界中的 Rails: Rails 中的缓存]]
+    [[http://viva-yang.javaeye.com/blog/678730][Ruby on Rails Caching Tutorial]
+
 ** common function
 *** 字段截取
 *** host获取

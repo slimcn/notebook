@@ -2,5 +2,6 @@
 
 
 * shell
-
+** find grep
+*** find ./ -type f | grep -v "\/\." | xargs grep "status<2"
 * tips
