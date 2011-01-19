@@ -1,7 +1,21 @@
 * init
-
+** 硬盘
+   sda1 ntfs
+   sda5 tools
+   sda11 data
+   sda6 WinData
+   sda7 LinuxWindows
+   sda8 home
+   sda9 swap
+   sda10 /
 
 * shell
 ** find grep
 *** find ./ -type f | grep -v "\/\." | xargs grep "status<2"
+* soft
+** net
+*** mldonkey
+http://admin@127.0.0.1:4080
+
 * tips
+** install

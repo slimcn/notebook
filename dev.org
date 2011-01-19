@@ -27,4 +27,8 @@ Ctrl-U，然后按 S 对选定内容切换大小写
 *** git add
 *** git commit -m
 *** git push origin
-
+** svn
+*** svn co --username u1 --password p1 svn://host/path
+*** svn update
+*** svn info
+*** svn log
