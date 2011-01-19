@@ -35,5 +35,6 @@ cd /usr/local
 sudo cp emacs23.2/bin/* bin/
 
 * shell
-
+** find grep
+*** find ./ -type f | grep -v "\/\." | xargs grep "status<2"
 * tips

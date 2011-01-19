@@ -1,4 +1,22 @@
 * ruby
+** regular experition
+*** 表达式的一般规则:
+  /a/匹配字符a。
+  /\?/匹配特殊字符?。特殊字符包括^, $, ? , ., /, \, [, ], {, }, (, ), +, *.
+  .匹配任意字符，例如/a./匹配ab和ac。
+  /[ab]c/匹配ac和bc,[]之间代表范围。例如：/[a-z]/ , /[a-zA-Z0-9]/。
+  /[^a-zA-Z0-9]/匹配不在该范围内的字符串。
+  /[\d]/代表任意数字，/[\w]/代表任意字母，数字或者_，/[\s]/代表空白字符，包括空格，TAB和换行。
+  /[\D]/，/[\W]/，/[\S]/均为上述的否定情况。
+
+*** 高级规则：
+  ?代表0或1个字符。/Mrs?\.?/匹配"Mr"，"Mrs"，"Mr."，"Mrs."。
+  *代表0或多个字符。/Hello*/匹配"Hello","HelloJavaeye"。
+  +代表1或多个字符。/a+c/匹配："abc"，"abbdrec"等等。
+  /d{3}/匹配3个数字。
+  /d{1,10}/匹配1-10个数字。
+  /d{3,}/匹配3个数字以上。
+  /([A-Z]\d){5}/匹配首位是大写字母，后面4个是数字的字符串。
 ** json
 *** JSON::parse(str_json) 将json string 转换为 json
 * rails
@@ -33,3 +51,12 @@
 *** 参考
     [[http://www.ibm.com/developerworks/cn/web/wa-rails1/][真实世界中的 Rails: Rails 中的缓存]]
     [[http://viva-yang.javaeye.com/blog/678730][Ruby on Rails Caching Tutorial]
+
+** common function
+*** 字段截取
+*** host获取
+*** 链接转向： 登录后回到 原页面/特定页面/触发的操作
+
+** url
+*** 链接：需每次刷新的页面链接使用随机参数，以解决不刷新的问题
+

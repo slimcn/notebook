@@ -1,4 +1,23 @@
-* git
+* IDE
+** NetBeans
+*** base
+直接跳转到类和方法的源代码 － Ctrl + B
+自动补齐 － Ctrl + "
+方法参数提示 － Ctrl + P
+快速修复提示 － Alt + Enter
+上下文帮助 － Ctrl + Shift + Enter
+重命名重构 － Ctrl + R
+
+Ctrl+Shift+↓ 复制当前行到下一行
+Alt+Shift+↓ 移动当前行到下一行
+
+Ctrl-U，然后按 U 将选定内容转换为大写
+Ctrl-U，然后按 L 将选定内容转换为小写
+Ctrl-U，然后按 S 对选定内容切换大小写
+*** rails
+在controller和view直接跳转 － Ctrl + Shift + A
+在controller/model和test /spec之间跳转 － Ctrl + Shift + T
+* VC
 ** github base flow
 *** generate ssh   : ssh-keygen
 *** add ssh to rep : github.com/account
