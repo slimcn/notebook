@@ -1,0 +1,38 @@
+* setup
+** /home/sjm
+sjm@sjm:~$ ls -al
+总计 196
+drwx------ 21 sjm  sjm  4096 2011-01-19 23:26 .
+drwxr-xr-x  5 root root 4096 2011-01-19 23:21 ..
+-rw-r--r--  1 sjm  sjm   220 2011-01-19 23:21 .bash_logout
+-rw-r--r--  1 sjm  sjm  3353 2011-01-19 23:21 .bashrc
+drwx------  7 sjm  sjm  4096 2011-01-19 23:27 .cache
+drwxr-xr-x  7 sjm  sjm  4096 2011-01-19 23:27 .config
+drwx------  3 sjm  sjm  4096 2011-01-19 23:26 .dbus
+lrwxrwxrwx  1 sjm  sjm    29 2011-01-19 23:21 .ecryptfs -> /home/.ecryptfs/sjm/.ecryptfs
+-rw-------  1 sjm  sjm    16 2011-01-19 23:26 .esd_auth
+-rw-r--r--  1 sjm  sjm   179 2011-01-19 23:21 examples.desktop
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 .fontconfig
+drwx------  5 sjm  sjm  4096 2011-01-19 23:28 .gconf
+drwx------  2 sjm  sjm  4096 2011-01-19 15:30 .gconfd
+drwx------  5 sjm  sjm  4096 2011-01-19 23:26 .gnome2
+-rw-r--r--  1 sjm  sjm   180 2011-01-19 23:26 .gtk-bookmarks
+dr-x------  2 sjm  sjm     0 2011-01-19 23:26 .gvfs
+-rw-------  1 sjm  sjm   306 2011-01-19 23:26 .ICEauthority
+drwxr-xr-x  3 sjm  sjm  4096 2011-01-19 23:26 .local
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 .nautilus
+lrwxrwxrwx  1 sjm  sjm    28 2011-01-19 23:21 .Private -> /home/.ecryptfs/sjm/.Private
+-rw-r--r--  1 sjm  sjm   675 2011-01-19 23:21 .profile
+drwx------  2 sjm  sjm  4096 2011-01-19 23:26 .pulse
+-rw-------  1 sjm  sjm   256 2011-01-19 23:26 .pulse-cookie
+-rw-------  1 sjm  sjm  3609 2011-01-19 15:28 .xsession-errors
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 公共的
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 模板
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 视频
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 图片
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 文档
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 下载
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 音乐
+drwxr-xr-x  2 sjm  sjm  4096 2011-01-19 23:26 桌面
+sjm@sjm:~$ 
+

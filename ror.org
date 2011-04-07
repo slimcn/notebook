@@ -1,6 +1,9 @@
 * ruby
 ** regular experition
-*** 表达式的一般规则:
+http://www.cnblogs.com/cnblogsfans/archive/2009/02/02/1382745.html
+http://www.cnblogs.com/cnblogsfans/archive/2009/02/03/1383505.html
+*** rules
+**** 表达式的一般规则:
   /a/匹配字符a。
   /\?/匹配特殊字符?。特殊字符包括^, $, ? , ., /, \, [, ], {, }, (, ), +, *.
   .匹配任意字符，例如/a./匹配ab和ac。
@@ -9,7 +12,7 @@
   /[\d]/代表任意数字，/[\w]/代表任意字母，数字或者_，/[\s]/代表空白字符，包括空格，TAB和换行。
   /[\D]/，/[\W]/，/[\S]/均为上述的否定情况。
 
-*** 高级规则：
+**** 高级规则：
   ?代表0或1个字符。/Mrs?\.?/匹配"Mr"，"Mrs"，"Mr."，"Mrs."。
   *代表0或多个字符。/Hello*/匹配"Hello","HelloJavaeye"。
   +代表1或多个字符。/a+c/匹配："abc"，"abbdrec"等等。
@@ -17,14 +20,104 @@
   /d{1,10}/匹配1-10个数字。
   /d{3,}/匹配3个数字以上。
   /([A-Z]\d){5}/匹配首位是大写字母，后面4个是数字的字符串。
+*** operate  =~  match sub/sub! gsub/gsub!
+    MatchData
+
+    全局变量：$1包含的是正则表达式中从左侧开始的第一对小括号内的子模式所匹配的字符串
+*** 贪婪量词和不贪婪量词  *  +  *? +?
+*** 锚
+    锚是指必须满座一定的条件，才能继续匹配
+
+^     行首
+
+$     行尾
+
+\A   字符串的开始
+
+\z    字符串的结尾
+
+\Z    字符串的结尾(不包括最后的换行符)
+
+\b    单词边界
+*** 前视断言
+    视断言表示想要知道下一个指定的是什么，但并不匹配
+    1. 肯定的前视断言（？=
+    2. 否定的前视断言(?!)
+*** 修饰语
+    修饰语位于正则表达式最结束正则表达式的正斜杠的后面
+    i  使正则表达式对大小写不敏感
+    m 使得正则表达式可以和任何字符匹配，包括换行符，通常情况下圆点通配符不匹配换行符
+
 ** json
 *** JSON::parse(str_json) 将json string 转换为 json
+** utf
+*** string length
+**** jcode
+     require 'jcode'
+     "测试test".length # 6
 * rails
+** tools
+*** rake
+**** rake db:migrate VESION=
+** form
+*** multiple mode in a form;  master-details
+    http://www.cnblogs.com/orez88/articles/1530286.html
+**** fields_for
+***** view: new
+<% form_for :master, :url=>master_path do |f| %>
+  ...
+  <% for detail in @master.details %>
+    <% fields_for "master[detial_attributes][]", detail do |detail_form| %>
+      ...
+    <% end %>
+  <% end %>
+  ...
+<% end %>
+****** 一对一
+   1. <% form_for :person, @person, :url => { :action => "update" } do |person_form| %>
+   2.   First name: <%= person_form.text_field :first_name %>
+   3.   Last name: <%= person_form.text_field :last_name %>
+   4.
+   5.   <% fields_for :permission, @person.permission do |permission_fields| %>
+   6.     Admin? : <%= permission_fields.check_box :admin %>
+   7.   <% end %>
+   8. <% end %>
+***** model: detail_attributes=
+def detail_attributes=(detail_attributes)
+  detail_attributes.each do |attributes|
+    details.build(attributes)
+  end
+end
+***** controller: new
+def new
+  @master = Master.new
+  3.times { @master.details.build }
+end
+** 优化
+
+   http://guides.rubyonrails.org/performance_testing.html
+
+
+   http://www.letrails.cn/archives/rails-performance-optimization-guide/
+   http://nubyonrails.com/articles/memcached-basics-for-rails
+*** 找出问题所在:request-log-analyzer
+    sudo gem install request-log-analyzer
+
+    request-log-analyzer log/production.log
+    request-log-analyzer -f log.html –output html log/production.log
+*** 基准测试 benchmark
+*** 改进
+**** query_reviewer
+**** bullet
 ** cache
-*** config
+http://wiki.rubyonrailscn.org/rails/show/RailsEnvyRailsCachePart2
+**** config
 **** 开启缓存
+     # environment.rb:
+     ActionController.action_controller.perform_caching = true
+
+     # config/environments/xxx.rb
      config.action_controller.perform_caching = true
-****
 **** store
      ActionController::Base.fragment_cache_store = :memory_store
      ActionController::Base.fragment_cache_store = :file_store, "/path/to/cache/directory"
@@ -33,24 +126,53 @@
 
      config.action_controller.page_cache_directory = RAILS_ROOT + "/public/cache/"
 
-*** 页面 page
+     config.action_controller.page_cache_extention = ".html"
+
+     默认在public下： :controller/:action/:id.html
+
+
+**** 失效
+***** 显式页面失效
+      expire_page :action => "xxx"
+      expire_action :action => "xxx", :id => "111"
+      expire_fragment :action => "xxx", :part => "xxx"
+      expire_fragment %r{/blog/list.*}
+***** 隐式页面失效 sweeper
+      xxx_sweeper.rb
+
+      cache_sweeper :xxx_sweeper, :only => [:create_xxx, :update_xxx, :delete_xxx]
+***** 基于时间的失效策略
+**** 页面 page
     1，需要cache的page对所有用户一致
     2，需要cache的page对public可访问，不需要authentication
 
     # controller.rb
     caches_page :list, :show  # public/controller/list.html
 
+    caches_page :action_name # in controller.rb
+**** 动作 action
+    caches_action :action_name # in controller.rb; filter还是会执行的
 
-*** 动作 action
-*** 片段 fragment
+    默认情况下，action缓存不会保存在文件系统中，因此也不能用基于时间的失效机制
+**** 片段 fragment
+**** viewer
+    <% cache(:action => "action_name", :part => "part_name") do %> <!-- cache start -->
+    <% end %> <!-- cache end -->
+**** controller
+     unless read_fragment(:action => "action_name", :part => "part_name")
+     end
 **** notice
-对象中有表单或者是rails的link_to_remote ajax等辅助方法时，要注意，因为rails生成的html中都有验证的随机数，所以如果把这些内容缓存的话，会报错 ActionController::InvalidAuthenticityToken，
+***** 命名规则
+      默认 :controller/:action    只能适用于单个缓存页面 静态文件:controller/:acitong.html
+      增加命名： :action => "action_name", :part => "part_name"  静态文件:controller/:acitong.:part.html
+***** 含有随机数的辅助方法缓存可能有问题
+      对象中有表单或者是rails的link_to_remote ajax等辅助方法时，要注意，因为rails生成的html中都有验证的随机数，所以如果把这些内容缓存的话，会报错 ActionController::InvalidAuthenticityToken，
 解决办法就是要么对该类内容不缓存，要么就是在控制器application.rb中取消rails的表单及post请求的自动验证功能，不过这样肯定不好的
 ***** 有表单、ajax辅助方法 验证随机数错误 ActionController::InvalidAuthenticityToken
-*** model
-*** 参考
+**** model
+**** 参考
     [[http://www.ibm.com/developerworks/cn/web/wa-rails1/][真实世界中的 Rails: Rails 中的缓存]]
-    [[http://viva-yang.javaeye.com/blog/678730][Ruby on Rails Caching Tutorial]
+    [[http://viva-yang.javaeye.com/blog/678730][Ruby on Rails Caching Tutorial]]
 
 ** common function
 *** 字段截取
@@ -60,3 +182,77 @@
 ** url
 *** 链接：需每次刷新的页面链接使用随机参数，以解决不刷新的问题
 
+
+** ? routes.rb
+*** Rails Routing from the Outside In
+http://www.blogjava.net/xiaoqiu369/articles/247327.html
+
+Rails Routing from the Outside In
+http://guides.rails.info/routing_outside_in.html
+**** 这篇文章将介绍Rails routing针对用户方面的一些特性.参考这篇文章,你将会学到以下知识:
+a.理解routing的作用
+b.破解routes.rb内的代码
+c.构建你自己的routes,可以用classic hash样式或现在流行的RESTful样式.
+d.识别route怎样与controller和action映射.
+
+**** 1.The Dual Purpose of Routing
+
+Rails routing 有两种机制,你可以将trees转换为pager,或把paper转换回trees.具体地说,它可以连接收到的请求与你应用程序的控制器的代码和帮你生成URLs,而不用做为一个字符串硬编码.
+
+***** 1.1connecting URLs to Code;
+当你的应用程序收到的请求为:
+GET /patients/17
+Rails里的路由引擎就是一段分发这个请求到应用程序合适的位置进行处理的一段代码.在这个案例中,这个应用程序很可能以运行patients控制器里的show结束.显示patients ID为17的详细信息.
+
+***** 1.2 Generateing URLs from Code
+Routing 也可以反过来运行,如果你的应用程序中包含这样的代码:
+
+@patient=Patient.find(17)
+<%= link_to "Patient Record",patient_path(@patient)%>
+
+这时路由引擎转换这个链接到一个URL:http://example.com/patients/17.以这种方式你可以降低应用程序的脆弱性,使你的代码更加容易阅读和理解.
+
+Patient 必须作为一个resource被声明为一个资源,通过named route来转换.
+
+**** 2.Quick Tour of Routes.rb
+
+在Rails中routing有两种组件,routing engine本身,它做为Rails的一部分,config/routes.rb文件,它包含实际的可用在应用程序中的routes.
+
+***** 2.1 Processing the File
+在形式上,Routes.rb文件也就是一个大大的block,会被放入ActionController::Routing::Routes.draw.
+在这个文件中有五种主要的样式:
+RESTful Routes
+Named Routes
+Nested Routes
+Regular Routes
+Default Routes
+
+***** 2.2 RESTful Routes
+RESTful Routes 利用rails嵌入式REST方法来将routing的所有信息包装为一个单独的声明.eg: map.resource :books
+
+***** 2.3 named Routes
+named routes 在你的代码中给你很可读的链接,也可以处理收到的请求
+
+map.login '/login' ,:controller=>'session',:action=>'new'
+
+***** 2.4 Nested routes
+
+Nested routes可以在一个资源里声明另一个资源.
+
+map.resources :assemblies do |assemblies|
+ assemblies.resources :parts
+end
+
+***** 2.5 Regular Routes
+map.connect 'parts/:number',:controller=>'inventory',:action=>'show'
+
+***** 2.6 Default Routes
+map.connect ':controller/:action/:id'
+map.connect ':controller/:action/:id.:format'
+
+
+** ? workflow
+
+** ? IM
+
+** ?

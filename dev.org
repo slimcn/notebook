@@ -1,5 +1,75 @@
 * IDE
+** emacs
+*** 列编辑模式
+**** emacs 列模式编辑 - [Emacs]
+2008-02-18
+Tag：
+
+版权声明：转载时请以超链接形式标明文章原始出处和作者信息及本声明
+http://chandlewei.blogbus.com/logs/15583440.html
+
+不敢独享，与大家分享。也可以在Emacs中用C-x C-h列出全部命令，查找C-x r c，所有列模式命令都是以C-x r开始的
+C-x r C-@                    point-to-register
+C-x r SPC                    point-to-register
+C-x r +        increment-register
+C-x r b        bookmark-jump
+C-x r c        clear-rectangle
+先用C-space或者C-@设一个mark，移动光标到另一点，使用C-x r c可以清楚mark到光标处的矩形区域，该区域留下空白。
+C-x r d        delete-rectangle
+删除矩形区域，不留空白，后面的字符前移
+C-x r f        frame-configuration-to-register
+C-x r g        insert-register
+C-x r i        insert-register
+将某个寄存器的内容插入某处
+C-x r j        jump-to-register
+C-x r k        kill-rectangle
+就是剪切某个选定的矩形区域，用C-x r y可以贴上
+C-x r l        bookmark-bmenu-list
+C-x r m        bookmark-set
+C-x r n        number-to-register
+C-x r o        open-rectangle
+在选定的矩形区域插入空白
+C-x r r        copy-rectangle-to-register
+将选定的矩形区域复制到某个寄存器
+C-x r s        copy-to-register
+C-x r t        string-rectangle
+在选定区域所有列前插入同样的字符
+C-x r w        window-configuration-to-register
+C-x r x        copy-to-register
+C-x r y        yank-rectangle
+类似于矩形区域的粘贴，就是将刚用C-x r k剪切的矩形区域粘贴过来
+C-x r C-SPC    point-to-register
+**** cua-mode
+在cua-mode下，按[C-return]会进入cua rectangle模式。在这个模式下可以通过鼠标点击确认起点，然后通过光标键来选中一个rect范围，这个rect会用另外的颜色显示出来。
+之后我们 就可以很方便地对这个rect进行操作。比如[M-up],[M-down],[M-left],[M-right]可以移动这个rect，[C- return]可以取消这个rect，[C-space]可以退出cua-rect模式并激活普通模式下的选择。
+
+cua-mode下可以用以下命令进行列操作：
+
+直接输入字符: 在每行前(或后)都插入这个字符
+[M-a]: 将rect中的文字左对齐
+[M-b]: 用空格(tabs或者spaces)替换所有rect中的字符
+[M-c]: 去掉所有行左侧的空格
+[M-f]: 用单个字符替换所有rect中的字符(提示输入一个字符)
+[M-i]: 对每行中第一个找到的数字进行加1操作(自动把0x开头的当作十六进制数字)
+[M-k]: 剪切rect
+[M-l]: 把rect中的内容全部转换为小写
+[M-m]: 拷贝rect
+[M-n]: 用一串自增的数字替换rect中的每一行(这个功能可以用来给每行编号)
+[M-o]: rect的内容右移，选中的rect用空格填充
+[M-r]: 用字符串替换符满足正则表达式的字符串
+[M-R]: 上下反转<br />[M-s]: 把rect中的每一行替换为一个字符串(提示输入)
+[M-t]: 把rect整个替换为一个字符串(提示输入)<br />
+[M-u]: 把rect中的内容全部转换为大写<br />
+[M-|]: 对rect执行一个shell命令<br /></span>
+
+
+还有一些其他的命令可以直接看cua-base.el(emacs22之后已经自带。另无意中发现一个阅读package说明的方法: M-x finder-commentary)。
+Emacs用户手册里面对CUA介绍得比较简单，可到原网站阅读说明 http://www.cua.dk/cua.html
+*** tips
+**** C+u M+x shell 打开shell
 ** NetBeans
+*** config
+    --local=en_us  使用英文界面
 *** base
 直接跳转到类和方法的源代码 － Ctrl + B
 自动补齐 － Ctrl + "
@@ -18,6 +88,15 @@ Ctrl-U，然后按 S 对选定内容切换大小写
 在controller和view直接跳转 － Ctrl + Shift + A
 在controller/model和test /spec之间跳转 － Ctrl + Shift + T
 * VC
+** git svn
+   git svn clone -rStart:HEAD --username=name1 --password=ps1 svn://path
+   # git operate
+   git svn rebase
+   # git 解决冲突
+   git svn rebase --continue
+   git svn dcommit
+
+   git clean -dxf
 ** github base flow
 *** generate ssh   : ssh-keygen
 *** add ssh to rep : github.com/account
@@ -32,3 +111,5 @@ Ctrl-U，然后按 S 对选定内容切换大小写
 *** svn update
 *** svn info
 *** svn log
+
+

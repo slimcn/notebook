@@ -1,38 +1,80 @@
 * init
-** 硬盘
-   sda1 ntfs
-   sda5 tools
-   sda11 data
-   sda6 WinData
-   sda7 LinuxWindows
-   sda8 home
-   sda9 swap
-   sda10 /
+** 硬盘自动挂载
+   sudo fdisk -l # 查看分区
+   ls -al /dev/disk/by-uuid
+   sudo mkdir /media/c /media/tools /media/windata /media/data /media/linuxwin
+   sudo gedit /etc/fstab
+/dev/sda1 /media/c ntfs user, nls=utf8, umask=0222, gid=1000, auto 0
+/dev/sda5 /media/tools ntfs user, nls=utf8, umask=0222, gid=1000, auto 0
+/dev/sda6 /media/windata ntfs user, nls=utf8, umask=0222, gid=1000, auto 0
+/dev/sda7 /media/linuxwin vfat user, auto, umask=002, gid=1000, utf8 0 0
+/dev/sda11 /media/data ntfs user, nls=utf8, umask=0222, gid=1000, auto 0
 
-** tmp
-ruby
-rubygems
-sudo gem install -v=2.3.8 rails
-libxml 
-sudo gem install -v=1.1.4 libxml-ruby
+** env
+   # gedit 自动识别 gbk
+   gconftool-2 --set --type=list --list-type=string /apps/gedit-2/preferences/encodings/auto_detected "[UTF-8,CURRENT,GBK,BIG5-HKSCS,UTF-16]"
+   # 右击桌面打开终端和右击文件用终端打开
+   sudo apt-get install nautilus-open-terminal
+   # 右击文件和文件夹用管理员权限打开
+   sudo apt-get install nautilus-gksu
+   sudo apt-get install openssh-server openssh-client
+   # 终端中文
+   sudo apt-get install fbterm fbterm-ucimf
+   # pdf中文
+   sudo apt-get install xpdf-chinese-simplified
+   sudo apt-get install xpdf-chinese-traditional
+   sudo apt-get install poppler-data
+   sudo rm /etc/fonts/conf.d/49-sansserif.conf
 
-nokogiri
-sudo apt-get install ruby1.8-dev ruby1.8 ri1.8 rdoc1.8 irb1.8
-sudo apt-get install libreadline-ruby1.8 libruby1.8 libopenssl-ruby
-sudo apt-get install libxslt-dev libxml2-dev
-sudo gem install nokogiri # need to: chmod 555 nokogiri
+   sudo apt-get install unrar p7zip-full
+   # 删除原日期显示，右键单击面板，“添加到面板–农历日期”
+   sudo apt-get install lunar-applet
 
-sudo apt-get install rake
-rake gems:install
+   #sudo apt-get install thunderbird
+   #sudo apt-get install bluefish # html编辑器
 
-mysql
+   sudo apt-add-repository "deb http://archive.getdeb.net/ubuntu maverick-getdeb apps"
+   sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com A8A515F046D7E7CF
+   sudo apt-get update
+   sudo apt-get install pac # ssh 登录管理
+** 较大
+   sudo apt-get install openjdk-6-jre
+   sudo apt-get install stardict # dictionary copy to /usr/share/stardict/dic
+   sudo apt-get install amsn
 
-jre
-netbeans
+   sudo apt-get install freemind dia
 
+** ror
+   sudo apt-get install ruby-dev ruby1.8-dev ruby1.8 ri1.8 rdoc1.8 irb1.8 ruby-debug-ide
+   sudo apt-get install libreadline-ruby1.8 libruby1.8 libopenssl-ruby libxslt-dev libxml2-dev
+   sudo apt-get install rake sqlite3 libsqlite3-dev sqlite3-doc
+   sudo apt-get install rubygems
+   sudo gem install -v=2.3.8 rails
+   sudo gem install nokogiri # need to: chmod 555 nokogiri
+   sudo gem install libxml-ruby will_paginate
+   sudo gem install mysql # 需先安装 mysql
+   sudo gem install sqlite3-ruby
+   sudo gem install json
+
+   sudo apt-get install libncurses5-dev libreadline5-dev
+
+
+   #deb http://oss.oracle.com/debian unstable main non-free
+   sudo gem install activerecord-oracle_enhanced-adapter
+   sudo gem install activerecord-oracle-adapter --source http://gems.rubyonrails.org # oracle链接
+
+   # oracle
+   # 1、安装客户端 xe-client 并设置环境变量
+   # 2、编译安装oci： setup.rb config/../..
+
+** netbeans  ~/netbeans-6.8/bin/netbeans
+** git
+   sudo apt-get install git git-core git-svn gitk
+** svn
+   sudo apt-get install subversion
 ** emacs
-sudo apt-get install build-essential libncurses5-dev libgtk2.0-dev libxpm-dev libgif-dev libtiff-dev
-sudo apt-get install librsvg2-dev libdbus-1-dev libgconf2-dev
+sudo apt-get install build-essential libncurses5-dev libgtk2.0-dev libxpm-dev libgif-dev libtiff-dev librsvg2-dev libdbus-1-dev libgconf2-dev
+
 
 #编译
 ./configure --prefix=/usr/local/emacs23.2 --with-x-toolkit=gtk --with-xft
@@ -44,13 +86,468 @@ sudo make install
 cd /usr/local
 sudo cp emacs23.2/bin/* bin/
 
+
+** 需人工值守
+   sudo apt-get install mysql-server mysql-client libmysqlclient-dev # 设置root密码
+   sudo gem install passenger #    http://blog.enjoyrails.com/2009/05/22/195/ http://wiki.rubyonrails.org/zh/deployment/apache-passenger
+   sudo passenger-install-nginx-module # nginx  sudo /var/lib/gems/1.8/bin/passenger-install-nginx-module
+
+
 * shell
-** find grep
-*** find ./ -type f | grep -v "\/\." | xargs grep "status<2"
+** common
+*** basename / dirname / cat / dircomp / head / logname / nl / printf / pwd / wait / uncompress /
+    whereis / who / whoami
+*** ps aux | grep
+   a: 当前终端所有用户程序
+   u: 以用户为主
+   x: 所有用户所有程序
+*** cp -rp
+    p: 保留权限模式和修改时间
+*** diff -I
+    I: 忽略大小写
+
+*** du -s / -a 磁盘大小
+    a: 每个文件大小
+    s: 只显示总计
+
+*** file 确定文件类型
+*** fuser -k -u -m file
+    k: 杀死所有相关进程
+    u/m: 显示访问该文件或文件系统的所有进程
+*** more -c -d -n
+    c: 不滚屏，通过覆盖来换页
+    d: 在分页处显示提示
+    n: 每屏显示n行
+*** script -a 记录输入
+    a: 将记录附加在文件尾
+*** shutdown
+    now: 立即关机
+    -g60 -I6 y: 60秒后关机并重启
+*** sleep
+*** strings 二进制文件中的字符串
+*** touch -t MMDDhhmm
+*** tty 终端号
+*** uname a/s/v 查看系统信息
+*** wc c/l/w
+    c: 字符数
+    l: 行数
+    w: 单词数
+*** find grep
+**** find ./ -type f | grep -v "\/\." | xargs grep "status<2"
+**** ps grep awk
+ps aux | grep "nginx: worker process" | awk '{print $1 $2}'
+
+** disk
+*** fdisk -l 分区
+*** mkfs 格式化
+*** df a h T 所有文件系统对磁盘使用情况
+    a: 所有文件系统
+    h: 方便阅读方式显示大小
+    T: 文件系统类型
+*** du 统计目录/文件占用磁盘大小
+    a
+    h
+    c: 显示总计信息
+*** dd 把指定的输入文件拷贝到指定的输出文件中，中间可做转换
+    if: 输入文件
+    of: 输出文件
+    conv= 转换
+*** fdformat
+*** mount / umount
+*** chmod  u/g/o/a + s/r/w/x  / chown / chgrp
+    chmod chmod u+s file 为file的属主加上特殊权限
+chmod g+r file 为file的属组加上读权限
+chmod o+w file 为file的其它用户加上写权限
+chmod a-x file 为file的所有用户减去执行权限
+chmod 765 file 为file的属主设为完全权限，属组设成读写权，其它用户具有读和执心权限
+19 文件权限 # chown chown root /home 把/home的属主改成root用户
+20 文件权限 # chgrp chgrp root /home 把/home的属组改成root组
+*** dmesg | grep scsi 硬件信息
+** kernel
+*** kexec 切换内核
+        # -l 载入内核镜像
+    # –command-line 系统基本设置
+    # –initrd 载入内核模块镜像
+    # -e 执行重载内核
+
+    # 我要切换的内核镜像是 vmlinuz26-kldoo9, 内核模块镜像是 kernel26-kldoo9.img， 而系统分区是 sda3, 那么可以这么写：(下面使用 root 用户)
+    root@~# kexec -l /boot/vmlinuz26-kldoo9 –command-line=”root=/dev/sda3 ro vga=773″ –initrd=”/boot/kernel26-kldoo9.img”
+    # 执行 kexec 重载内核
+    root@~# kexec -e
+    # 经过一系列内核操作后，你就能看到加载完新内核的控制台了
+** start
+*** simple
+**** 当用户打开PC的电源，BIOS开机自检，按BIOS中设置的启动设备(通常是硬盘)启动
+**** 接着启动设备上安装的引导程序lilo或grub开始引导 Linux
+**** Linux首先进行内核的引导
+**** 接下来执行init程序，
+     init程序调用了rc.sysinit和rc等程序，rc.sysinit和rc 当完成系统初始化和运行服务的任务后，返回init；
+**** init启动了mingetty后，打开了终端供用户登录系统，用户登录成功后进入了Shell，这样就完成了从开机到登录的整个启动过程。
+*** 10setps
+**** 启动第一步－－加载BIOS
+当你打开计算机电源，计算机会首先加载BIOS信息，BIOS信息是如此的重要，以至于计算机必须在最开始就找到它。
+这是因为BIOS中包含了 CPU的相关信息、设备启动顺序信息、硬盘信息、内存信息、时钟信息、PnP特性等等。
+在此之后，计算机心里就有谱了，知道应该去读取哪个硬件设备了。
+**** 启动第二步－－读取MBR
+硬盘上第0磁道第一个扇区被称为MBR，也就是Master Boot Record，即主引导记录，它的大小是512字节，别看地方不大，可里面却存放了预启动信息、分区表信息。
+系统找到BIOS所指定的硬盘的MBR后，就会将其复制到0×7c00地址所在的物理内存中。
+其实被复制到物理内存的内容就是Boot Loader，而具体到你的电脑，那就是lilo或者grub了。
+**** 启动第三步－－Boot Loader
+Boot Loader 就是在操作系统内核运行之前运行的一段小程序。
+通过这段小程序，我们可以初始化硬件设备、建立内存空间的映射图，从而将系统的软硬件环境带到一个合适的状态，以便为最终调用操作系统内核做好一切准备。
+Boot Loader有若干种，其中Grub、Lilo和spfdisk是常见的Loader。
+我们以Grub为例来讲解吧，毕竟用lilo和spfdisk的人并不多。
+系统读取内存中的grub配置信息（一般为menu.lst或grub.lst），并依照此配置信息来启动不同的操作系统。
+**** 启动第四步－－加载内核
+根据grub设定的内核映像所在路径，系统读取内存映像，并进行解压缩操作。此时，屏幕一般会输出“Uncompressing Linux”的提示。
+当解压缩内核完成后，屏幕输出“OK, booting the kernel”。
+系统将解压后的内核放置在内存之中，并调用start_kernel()函数来启动一系列的初始化函数并初始化各种设备，完成Linux核心环境的建立。
+至此，Linux内核已经建立起来了，基于Linux的程序应该可以正常运行了。
+**** 启动第五步－－用户层init依据inittab文件来设定运行等级
+内核被加载后，第一个运行的程序便是/sbin/init，该文件会读取/etc/inittab文件，并依据此文件来进行初始化工作。
+其实/etc/inittab文件最主要的作用就是设定Linux的运行等级，其设定形式是“：id:5:initdefault:”，这就表明Linux需要运行在等级5上。
+Linux的运行等级设定如下：
+0：关机
+1：单用户模式
+2：无网络支持的多用户模式
+3：有网络支持的多用户模式
+4：保留，未使用
+5：有网络支持有X-Window支持的多用户模式
+6：重新引导系统，即重启
+关于/etc/inittab文件的学问，其实还有很多，在后序文章中设计到的，卖个关子，敬请期待，呵呵
+**** 启动第六步－－init进程执行rc.sysinit
+在设定了运行等级后，Linux系统执行的第一个用户层文件就是/etc/rc.d/rc.sysinit脚本程序，
+它做的工作非常多，包括设定 PATH、设定网络配置（/etc/sysconfig/network）、启动swap分区、设定/proc等等。
+如果你有兴趣，可以到/etc /rc.d中查看一下rc.sysinit文件，里面的脚本够你看几天的:P
+**** 启动第七步－－启动内核模块
+具体是依据/etc/modules.conf文件或/etc/modules.d目录下的文件来装载内核模块。
+**** 启动第八步－－执行不同运行级别的脚本程序
+根据运行级别的不同，系统会运行rc0.d到rc6.d中的相应的脚本程序，来完成相应的初始化工作和启动相应的服务。
+**** 启动第九步－－执行/etc/rc.d/rc.local
+你如果打开了此文件，里面有一句话，读过之后，你就会对此命令的作用一目了然：
+# This script will be executed *after* all the other init scripts.
+# You can put your own initialization stuff in here if you don’t
+# want to do the full Sys V style init stuff.
+rc.local就是在一切初始化工作后，Linux留给用户进行个性化的地方。你可以把你想设置和启动的东西放到这里。
+**** 启动第十步－－执行/bin/login程序，进入登录状态
+此时，系统已经进入到了等待用户输入username和password的时候了，你已经可以用自己的帐号登入系统了。:)
+** LVM 逻辑盘卷管理
+*** LVM基本术语
+
+    前面谈到，LVM是在磁盘分区和文件系统之间添加的一个逻辑层，来为文件系统屏蔽下层磁盘分区布局，提供一个抽象的盘卷，
+    在盘卷上建立文件系统。首先我们讨论以下几个LVM术语：
+
+**** 物理存储介质（The physical media）
+      这里指系统的存储设备：硬盘，如：/dev/hda、/dev/sda等等，是存储系统最低层的存储单元。
+**** 物理卷（physical volume）
+      物理卷就是指硬盘分区或从逻辑上与磁盘分区具有同样功能的设备(如RAID)，是LVM的基本存储逻辑块，
+      但和基本的物理存储介质（如分区、磁盘等）比较，却包含有与LVM相关的管理参数。
+**** 卷组（Volume Group）
+      LVM卷组类似于非LVM系统中的物理硬盘，其由物理卷组成。
+      可以在卷组上创建一个或多个“LVM分区”（逻辑卷），LVM卷组由一个或多个物理卷组成。
+**** 逻辑卷（logical volume）
+      LVM的逻辑卷类似于非LVM系统中的硬盘分区，在逻辑卷之上可以建立文件系统(比如/home或者/usr等)。
+**** PE（physical extent）
+      每一个物理卷被划分为称为PE(Physical Extents)的基本单元，具有唯一编号的PE是可以被LVM寻址的最小单元。
+      PE的大小是可配置的，默认为4MB。
+**** LE（logical extent）
+      逻辑卷也被划分为被称为LE(Logical Extents) 的可被寻址的基本单位。在同一个卷组中，LE的大小和PE是相同的，并且一一对应。
+
+    首先可以看到，物理卷（PV）被由大小等同的基本单元PE组成。
+
+    一个卷组由一个或多个物理卷组成，
+
+    从上图可以看到，PE和LE有着一一对应的关系。逻辑卷建立在卷组上。逻辑卷就相当于非LVM系统的磁盘分区，可以在其上创建文件系统。
+
+    下图是磁盘分区、卷组、逻辑卷和文件系统之间的逻辑关系的示意图：
+
+    和非LVM系统将包含分区信息的元数据保存在位于分区的起始位置的分区表中一样，逻辑卷以及卷组相关的元数据也是保存在位于物理卷起始处的VGDA(卷组描述符区域)中。VGDA包括以下内容： PV描述符、VG描述符、LV描述符、和一些PE描述符 。
+
+    系统启动LVM时激活VG，并将VGDA加载至内存，来识别LV的实际物理存储位置。当系统进行I/O操作时，就会根据VGDA建立的映射机制来访问实际的物理位置。
+** 软件安装
+
+** 网卡、光纤卡、SCSI卡 网络交换机 存储交换机
+** 各种协议
+** 企业架构和服务器
 * soft
 ** net
 *** mldonkey
 http://admin@127.0.0.1:4080
+*** ssh
+
+** dev
+*** imagemagic
+http://www.imagemagick.org/script/install-source.php?ImageMagick=tt0kfq69otsd5isl8ov57jk3u2#unix
+在ror中安装后要重新: sudo gem install paperclip
+*** Ubuntu 8.10下安装Oracle10g客户端
+http://www.linuxidc.com/Linux/2009-03/18777.htm
+    Oracle 为 Ubuntu 用户设立了专门的 apt 源服务器，只需要在 /etc/apt/source.list 中添加一行：
+deb http://oss.oracle.com/debian unstable main non-free
+即可。在运行 apt-get update 命令之前，还需要将该源服务器的公钥添加在本地 apt 系统的密钥库中。首先下载公钥：
+
+wget http://oss.oracle.com/el4/RPM-GPG-KEY-oracle
+下载完成之后添加该公钥到密钥库中：
+sudo apt-key add RPM-GPG-KEY-oracle
+再执行
+sudo apt-get update
+同步软件包索引文件。
+我们可以从这个源上下载安装 Oracle 10g Express Edition。可以选择的软件包有：
+oracle-xe - Oracle Database 10g Express Western European Edition
+oracle-xe-client - Oracle Client 10g Express Edition
+oracle-xe-universal - Oracle Database 10g Express Universal Edition
+因为我的开发工作只需要在本地安装一个用于连接 Oracle 服务器的客户端，所以我选择安装的是 oralce-xe-client 这个软件包。
+sudo apt-get install oracle-xe-client
+安装成功之后，还需要在设置相关的环境变量。编辑 /etc/environment，添加如下几行：（注意直接复制过去，否则会出现ORACLE_HOME是一个目录等问题）
+ORACLE_HOME=/usr/lib/oracle/xe/app/oracle/product/10.2.0/client
+LD_LIBRARY_PATH=$ORACLE_HOME/lib:$LD_LIBRARY_PATH
+TNS_ADMIN=/usr/lib/oracle
+PATH=$PATH:$ORACLE_HOME
+保存文件之后，运行
+source /etc/environment
+使方才设置的环境变量即刻在当前终端中生效。切换到 /usr/lib/oracle 目录中，建立 tnsnames.ora 文件，用于配置 Oracle 服务器的连接信息。
+所有工作完成之后，就可以在本地连接 Oracle 服务器进行开发工作了。
+如果打开SQLPLUS出现
+/usr/lib/oracle/xe/app/oracle/product/10.2.0/client/bin/nls_lang.sh: 112: [[: not found
+则：vim   /usr/lib/oracle/xe/app/oracle/product/10.2.0/client/bin/nls_lang.sh
+
+原來的內容：
+
+if [[ -n "$LC_ALL" ]]; then
+  locale=$LC_ALL
+elif [[ -n "$LANG" ]]; then
+  locale=$LANG
+else
+  locale=
+fi
+
+修改成：
+
+if [ -n "$LC_ALL" ]; then
+  locale=$LC_ALL
+elif [ -n "$LANG" ]; then
+  locale=$LANG
+else
+  locale=
+fi
+
+即可。
+*** java
+http://hi.baidu.com/%D4%D9%D7%A2%B2%E1%D3%C3%BB%A7/blog/item/9af3d035ea48db86a71e12e9.html
+http://hi.baidu.com/hiei213/blog/item/d074058773c3903ec75cc354.html
+    jdk-6u22-linux-i586.bin,据说这个操作起来比较简单，不需要转换。
+然后，可以把它放置在任何你喜欢的文件夹，如果是像我样的菜鸟，建议把它放置到主文件夹（/usr）下。
+下面开始安装jdk：
+把下载的jdk复制到你喜环的目路 如果不能复制 看下面
+----------------------------------------------------------------------
+按Alt＋F2键，在弹出的窗口中输入gksu，然后在新弹出的窗口运行nautilus，之后会提示输入用户密码，输入后会打开一个文件管理器，在里面可以自由地复制。
+
+如果password error look!
+
+
+
+那是因为您没有设置 root 密码吧
+首先设置 root 密码
+sudo passwd root
+提示您首先输入您的用户密码
+之后再输入两次 root 密码就可以了
+======================================================================
+
+例如我的位置是:/usr
+
+$ sudo chmod u+x jdk-6u22-linux-i586.bin
+
+$ sudo -s ./jdk-6u22-linux-i586.bin
+
+ok，安装完毕，下面配置环境变量
+
+执行
+代码：
+sudo gedit /etc/environment
+
+在 environment中修改如下信息：
+PATH="........:/usr/jdk1.6.0_22/bin"
+CLASSPATH=".:/usr/jdk1.6.0_22/lib"
+JAVA_HOME="/usr/jdk1.6.0_22"
+
+由 于ubuntu中有默认jdk还需要执行如下工作
+执行
+代码：
+sudo update-alternatives --install /usr/bin/java java /usr/jdk1.6.0_22/bin/java 300
+sudo update-alternatives --install /usr/bin/javac javac /usr/jdk1.6.0_22/bin/javac 300
+
+通过 这一步将我们安装的JDK加入java选单
+然后执行。
+代码：
+sudo update-alternatives --config java
+
+通 过这一步设置系统默认的JDK
+然后在shell中执行
+代码：
+java -version
+此时显示的系统中的java就是刚刚安装的 java
+
+用命令测试jdk的版本
+
+java -version
+
+显示如下信息：成功安装
+
+java version "1.6.0_22"
+2. myeclipse key nLR7ZL-855555-68667456619507575 asus
+3. tomcat
+    2,复制安装文件到/usr/local/目录下面，在控制台console输入命令，
+sudo tar -zxvf apache-tomcat-6.0.28.tar.gz,
+将安装包解压至apache-tomcat-6.0.28目录下，
+3,console输入命令：sudo gedit /usr/local/apache-tomcat-6.0.28/bin/startup.sh，
+配置startup.sh文件，添加入以下配置项，
+JAVA_HOME=/usr/lib/sunJVM/JDK/jdk1.6.0_20
+PATH=$JAVA_HOME/bin:$PATH
+CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+TOMCAT_HOME=/usr/local/apache-tomcat-6.0.28
+其中的JAVA_HOME等如同上文Sun JDK安装一文所示。
+保存退出。
+4,进入/usr/local/apache-tomcat-6.0.28/bin/目录，
+输入命令：
+cd /usr/local/apache-tomcat-6.0.28/bin，
+sudo ./startup.sh
+启动tomcat服务器，
+若出现：
+Using CATALINA_BASE:   /usr/local/apache-tomcat-6.0.28
+Using CATALINA_HOME:   /usr/local/apache-tomcat-6.0.28
+Using CATALINA_TMPDIR: /usr/local/apache-tomcat-6.0.28/temp
+Using JRE_HOME:        /usr/lib/sunJVM/JDK/jdk1.6.0_20
+Using CLASSPATH:       /usr/local/apache-tomcat-6.0.28/bin/bootstrap.jar
+代码，则基本上正常启动了，输入http://localhost:8080/查看，看看能否出现熟悉的tomcat欢迎界面。
+5,其他配置，可以配置conf/server.xml文件，例如端口号等，
+输入命令：sudo gedit /usr/local/apache-tomcat-6.0.28/conf/server.xml
+<Connector port="80" protocol="HTTP/1.1"
+connectionTimeout="20000"
+redirectPort="8443" URIEncoding="UTF-8"/>
+将监听端口改成80，添加URIEncoding="UTF-8"以支持中文参数传递处理。
+停止shutdown服务器命令是：
+sudo ./shutdown.sh
+
+
+sudo chmod --recursive 777 /usr/local/apache-tomcat-6.0.26
+为tomcat设置权限 任何用户都可以访问
+-----------------------------------------------------------------------------------------------------------
+
+6.
+基于Ubuntu 的Fcitx 4.0beta的安装和简单的配置
+
+安装是基于最新的Ubuntu 10.10下安装，安装的方法有很多deb包，自己编译打包等。本人追求快捷，而且此方法能安装到最新的Fcitx 4.0~beta1~r455~lucid1 (fcitx).安装过程很简单只需要三步就可。
+1.添加fcitx源(官方的源是旧版，不推荐使用)
+fcitx的ppa源，内含fcitx和fcitx-config，由wengxt搭建，使用命令 gedit /etc/apt/sources.list,在sources.list文件中尾部添加
+deb http://ppa.launchpad.net/wengxt/fcitx-nightly/ubuntu lucid main
+然后更新源 apt-get update
+2.删除旧版或其它输入法(也可跳过此步)
+Ubuntu10.10 默认是安装了ibus.所以删除它
+sudo apt-get remove ibus
+对于已经安装老版 的fcitx,删掉再装.
+sudo apt-get remove fcitx
+3.安装fcitx
+在终端执行 sudo apt-get install fcitx
+和fcitx配置工具 sudo apt-get install fcitx-config
+然后执行
+im-switch -s fcitx -z default #设为默认输入法，一般不需要，除非系统有多个输入法
+————————————————-
+安装完之后,然后重启你的X，应该就可以用Ctrl+Space调出fcitx来使用。
+另外：安装后fcitx托盘会有一个黑色的阴影，对于追求完美的我们来说还是有点不爽，最新版已经有了解决方法。点击输入法上的图标，选择“fcitx配置”，在在延时fcitx启动项填入一个数值即可，比如3秒。
+可以设置自己喜欢的双拼方案。
+比如小鹤的。不会的可以留言
+
+Tomcat 安装部署步骤：
+执行下列命令
+tar -zxvf apache-tomcat-6.0.29.tar.gz
+cp -R apache-tomcat-6.0.29 /usr/share/tomcat6029
+gedit  /etc/profile
+在 /etc 的 profile 文件最后添加
+          export CATALINA_HOME="/usr/share/tomcat6029"
+          export CATALINA_BASE="/usr/share/tomcat6029"
+
+启动 tomcat
+/usr/share/tomcat6029/bin/startup.sh
+显示
+        Using CATALINA_BASE:   /usr/share/tomcat6029
+        Using CATALINA_HOME:   /usr/share/tomcat6029
+        Using CATALINA_TMPDIR: /usr/share/tomcat6029/temp
+        Using JRE_HOME:        /usr/java/jdk1.6.0_21
+        Using CLASSPATH:       /usr/share/tomcat6029/bin/bootstrap.jar
+
+到此 tomcat 已经安装完成，现在使用浏览器访问 http://[ 安装服务器 IP]:8080 ，出现 tomcat 默认页面，说明已经安装成功。
+
+
+Eclipse3.6
+
+
+step2：解压缩安装包，放置相应安装目录
+把eclipse放在自己需要的文件夹
+可以用alt+f2方法 然后解压
+命令：
+tar -zxvf eclipse-SDK-3.6-linux-gtk.tar.gz
+这样就可以直接用了
+
+myeclipse同样下载压缩包
+去那里下可以去google搜以下 myeclipse xiexiejiao 关键字
+里面还有注册码
+tar -zxvf ......
+然后运行里面的install就可以安装。图形化界面
+
+关于解压缩。。在软件中心下搜一下 ARK
+下载安装就可以了
+** init
+*** usb virtualbox
+http://forum.ubuntu.org.cn/viewtopic.php?f=65&t=133443
+
+    但是把USB设备的读写权限开放给所有用户的方式在一些情况下不太安全，更为稳妥的做法是：
+
+增加用户组usbfs
+$ sudo groupadd usbfs
+
+查看usbfs用户组的gid
+$ cat /etc/group | grep usbfs
+
+usbfs:x:1002:
+
+
+把当前用户增加到usbfs组
+$ sudo gedit /etc/group
+把 usbfs:x:1002:
+修改为 usbfs:x:1002:joson
+
+为USB设备重新设置权限,编辑/etc/fstab文件，添加下面两行，注意你的gid可能不是1002
+$ sudo gedit /etc/fstab
+在末尾加上
+# 1002 is the USB group IDI
+none /proc/bus/usb usbfs devgid=1002,devmode=774 0 0
+
+重新启动后，应该就可以在客户机中使用USB设备了。
+
+方法：插入一个USB设备后，如U盘、鼠标，右键点击虚拟机里右下脚的USB图标，选择已经识别的U盘，就可以正常使用了。
+注意： 在客户机里使用USB设备前要先在主机里卸载。
 
 * tips
 ** install
+** rails 尚未安装 path更新
+
+ubuntu linux使用gem安装rails后，在bash shell中无法使用rails命令，提示尚未安装。
+
+此问题出现原因为PATH变量未更新。
+
+解决方法：
+
+1.更新文件数据库
+
+sudo updatedb
+
+2.查找rails安装路径
+
+locate rails | grep bin
+
+3.建立快捷方式
+
+ln -s /var/lib/gems/1.8/bin/rails /usr/bin/rails
+
+ln -s /var/lib/gems/1.8/bin/rake /usr/bin/rake
+
+http://forum.ubuntu.org.cn/viewtopic.php?f=139&t=255746&start=0
