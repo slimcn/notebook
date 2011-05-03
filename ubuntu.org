@@ -526,6 +526,15 @@ none /proc/bus/usb usbfs devgid=1002,devmode=774 0 0
 方法：插入一个USB设备后，如U盘、鼠标，右键点击虚拟机里右下脚的USB图标，选择已经识别的U盘，就可以正常使用了。
 注意： 在客户机里使用USB设备前要先在主机里卸载。
 
+** rvm
+   https://rvm.beginrescueend.com/
+   http://xiang.lu/2010/12/%E5%9C%A8ubuntu10-10%E4%B8%AD%E5%AE%89%E8%A3%85-rvm/
+   http://blog.jiaeil.com/noteit/rvm-cheet-sheet/
+*** rvm
+**** bash < <(curl -s https://rvm.beginrescueend.com/install/rvm)
+**** mkdir -p ~/.rvm/src/ && cd ~/.rvm/src && rm -rf ./rvm/ && git clone --depth 1 git://github.com/wayneeseguin/rvm.git && cd rvm && ./install
+Initialized empty Git repository in /home/sjm/.rvm/src/rvm/.git/
+
 * tips
 ** install
 ** rails 尚未安装 path更新

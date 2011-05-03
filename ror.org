@@ -1,4 +1,146 @@
 * ruby
+** base
+*** tmp
+*** tools
+****
+*** class
+**** 命名规则 开始
+     ? ! =
+***** 小写        局部变量、方法参数、方法名
+***** 首字母大写   类名、模块名、常量  词间混合大小写
+***** @          实例变量  词间"_"
+***** @@         类变量
+***** $          全局变量
+**** 常用方法
+***** inspect / to_s :前者多用于调试
+*** type
+**** array key只能为整数
+***** a = ['a', 'b', 'c']
+***** a = %w{ a b c}
+**** hash key可为任意对象
+***** a = {'a'=>'v_a', 'b'=>'v_b'}
+**** find / each / collect / inject
+**** string  %q{}:''   %Q{}:""    <<-here_doc .... here_doc(终结符尽量在行首)
+*** struct
+**** if con1 ... elsif con2 ... else ... end
+**** ... if con1
+**** while con1 ... end
+**** ... while con1
+*** model
+*** thread
+*** unit test
+*** others
+**** eval, class_eval, instance_eval和binding
+发表于 2009年12月13日 由 ssword
+
+前些天写html生成器的时候用到了erb，在生成html的时候是这么一句：
+
+html=tpl.result(binding)
+
+binding这个变量（Kernel的一个方法 T_T）有点古怪，就搜了下。它表示了ruby的当前作用域，没有任何对外可见的成员函数，唯一的用途就是传递给eval作第二个参数。因而可以这样：
+
+def test_binding
+    magic='brother Chun is PURE MAN'
+    return binding
+end
+eval "puts magic", test_binding
+
+这样就穿越了一个作用域。
+
+有时可以见到这样的构造函数：
+
+a=Baby.new {
+    name "Makr"
+    father "Mike"
+    age 0.2
+}
+a.cry
+
+好处就是好看。实现起来其实也很容易，用instance_eval：
+
+class Baby
+    def initialize(&blc)
+        instance_eval(&blc) #here
+    end
+
+    def name(str=nil)
+        @name=str if str
+        @name
+    end
+    def age(num=nil)
+        @age=num if num
+        @age
+    end
+    def father(str=nil)
+        @father=str if str
+        @father
+    end
+    def cry
+        puts "#{name} is only #{age.to_s} year old, he wanna milk! Brother Chun is PURE MAN!"
+    end
+end
+
+有重复代码？用class_eval缩短之，有点像宏了：
+
+class Baby
+    def initialize(&blc)
+        instance_eval(&blc)
+    end
+
+    def Baby.my_attr(*names)
+        names.each{|n|
+            class_eval %{
+                def #{n}(x=nil)
+                    @#{n}=x if x
+                    @#{n}
+                end
+            }
+        }
+    end
+
+    my_attr :name, :father, :age
+
+    def cry
+        puts "#{name} is only #{age.to_s} year old, he wanna milk! Brother Chun is PURE MAN!"
+    end
+end
+
+a=Baby.new {
+    name "Makr"
+    father "Mike"
+    age 0.2
+}
+a.cry
+
+这里class_eval穿越到了类的作用域，实现了动态添加函数。instance_eval也是，穿越到了实例的作用域，实现修改其内部数据。明白了它们的穿越关系，我们可以实现自己的class_eval和instance_eval——从合适的地方搞到binding就行了。
+
+class Baby
+    def my_instance_eval(code)
+        eval code, binding
+    end
+    def Baby.my_class_eval(code='')
+        eval code, binding
+    end
+end
+
+就这么简单。调用的时候就像这样：
+
+class Baby
+    def initialize(code)
+        my_instance_eval(code)
+    end
+    my_attr :name, :father, :age
+end
+a=Baby.new %{
+    name "Test"
+    father "Orz"
+    age 0.2
+}
+
+刚才省略了一点，那就是class_eval和instance_eval可以接受block代替字符串。搜了下，貌似没找到eval接受block的方法，所以这顶多算是只能eval字符串的山寨class_eval。
+
+update: 想起来ruby中lambda和proc在作用域上的小区别，也就是binding的不同了。proc直接使用原先的binding，lambda继承原先作用域创建一个新的binding。
+
 ** regular experition
 http://www.cnblogs.com/cnblogsfans/archive/2009/02/02/1382745.html
 http://www.cnblogs.com/cnblogsfans/archive/2009/02/03/1383505.html
@@ -256,3 +398,746 @@ map.connect ':controller/:action/:id.:format'
 ** ? IM
 
 ** ?
+* questions
+** 如何安装ruby on rails
+在安装rails之前，要先安装rubygems。rubygems是ruby的在线包管理工具，可以从rubyforge下载rubygems：
+
+http://rubyforge.org/projects/rubygems/
+
+下载好源代码包，解压缩，安装：
+tar xzvf rubygems-0.9.0.tgz
+cd rubygems-0.9.0/
+ruby setup.rb
+
+然后就可以安装rails了，在确认服务器已经连接互联网的情况下执行：
+gem install rails –y
+即通过gem从rubyforge网站下载rails所有依赖包安装。
+
+安装好rails以后，可以执行：
+rails –v
+确认一下rails的版本。
+** 如何将一个描述日期或日期/ 时间的字符串转换为一个Date对象？
+将日期字符串传递给Date.parse或DateTime.parse：
+require ‘date’
+Date.parse(’2/9/2007′).to_s
+# => "2007-02-09"
+DateTime.parse(’02-09-2007 12:30:44 AM’).to_s
+# => "2007-09-02T00:30:44Z"
+DateTime.parse(’02-09-2007 12:30:44 PM EST’).to_s
+# => "2007-09-02T12:30:44-0500"
+Date.parse(‘Wednesday, January 10, 2001′).to_s
+# => "2001-01-10"
+** 给定一个时间点，希望得到其他时间点
+Ruby 的所有时间对象都可像数字一样用在值域中。Date和DateTime对象按天递增，而Time对象按秒递增：
+require ‘date’
+(Date.new(1776, 7, 2)..Date.new(1776, 7, 4)).each { |x| puts x }
+# 1776-07-02
+# 1776-07-03
+# 1776-07-04
+
+span = DateTime.new(1776, 7, 2, 1, 30, 15)..DateTime.new(1776, 7, 4, 7, 0, 0) span.each { |x| puts x }
+# 1776-07-02T01:30:15Z
+# 1776-07-03T01:30:15Z
+# 1776-07-04T01:30:15Z
+
+(Time.at(100)..Time.at(102)).each { |x| puts x }
+# Wed Dec 31 19:01:40 EST 1969
+# Wed Dec 31 19:01:41 EST 1969
+# Wed Dec 31 19:01:42 EST 1969
+
+Ruby 的Date类定义了step和upto两种方便的由数字使用的迭代器：
+the_first = Date.new(2004, 1, 1)
+the_fifth = Date.new(2004, 1, 5)
+the_first.upto(the_fifth) { |x| puts x }
+# 2004-01-01
+# 2004-01-02
+# 2004-01-03
+# 2004-01-04
+# 2004-01-05
+** 为什么说Ruby是一种真正的面向对象程序设计语言？
+在Ruby中，所操作的一切都是对象，操作的结果也是对象。
+很多语言都说自己是面向对象的，但是他们往往对面向对象的解释都一样，大多是以自己特有的方式来解释什么是面向对象，而在实际情况中，这些面向对象语言又采用了很多非面向对象的做法。
+以 Java 为例：如果你想取一个数字取绝对值，java 的做法是：
+int num = Math.abs(-99);
+也就是将一个数值传递给 Math 类的一个静态函数 abs 处理。为什么这么做？因为在 java 中，数值是基本类型不是类。
+而在 Ruby 中，任何事物都是对象，也就是说，数字–99就是对象，取绝对值这样的操作应该属于数字本身，所以Ruby的做法就是：
+c = -99.abs
+** Ruby如何定义一个类？
+类是对具有同样属性和同样行为的对象的抽象，Ruby中类的声明使用class关键字。定义类的语法如下，
+  class ClassName
+   def method_name(variables)
+    #some code
+   end
+  end
+类的定义要在class…end之间，在上面的格式中，ClassName是类名，类名必须以大写字母开始，也就是说类名要是个常量。
+
+看下面的例子：
+class Person
+def initialize(name, gender, age)
+ @name = name
+ @gender = gender
+@age = age
+end
+end
+
+若某个类已经被定义过，此时又用相同的类名进行类定义的话，就意味着对原有的类的定义进行追加。
+
+class Test
+  def meth1
+   puts “This is meth1″
+  end
+end
+
+class Test
+  def meth2
+   puts “This is meth2″
+  end
+end
+
+在Test类中，原有meth1方法，我们又追加了meth2方法，这时候，对于Test类的对象，meth1和meth2同样可用。
+** 介绍一下Ruby中的对象，属性和方法
+   在Ruby中，除去内部类的对象以外，通常对象的构造都是动态确定的。某对象的性质由其内部定义的方法所决定。
+看下面的例子，我们使用new方法构造一个新的对象，
+
+class Person
+def initialize(name, gender, age)
+ @name = name
+ @gender = gender
+@age = age
+end
+end
+ people = Person.new(‘Tom’, ‘male’, 15)
+
+我们可以使用Person.new方法来创建一个Person类的实例对象。以@打头的变量是实例变量，他们从属于某一实例对象，Ruby中实例变量的命名规则是变量名以@开始，您只能在方法内部使用它。
+initialize方法使对象变为“就绪”状态，initialize方法是一个特殊的方法，这个方法在构造实例对象时会被自动调用。
+对实例进行初始化操作时，需要重定义initialize方法。类方法new的默认的行为就是对新生成的实例执行initialize方法，传给new方法的参数会被原封不动地传给initialize方法。另外，若带块调用时，该块会被传给initialize方法。因此，不必对new方法进行重定义。
+在Ruby中，只有方法可以操作实例变量，因此可以说Ruby中的封装是强制性的。在对象外部不可以直接访问，只能通过接口方法访问。
+
+class Person
+  def name
+   @name
+  end
+
+  def gender
+   @gender
+  end
+
+  def age
+   @age
+  end
+end
+
+people = Person.new(‘Tom’, ‘male’, 15)
+puts people.name
+puts people.gender
+puts people.age
+
+输出结果为：
+Tom
+male
+15
+
+在Ruby中，一个对象的内部属性都是私有的。 上面的代码中，我们定义了方法name，gender，age三个方法用来访问Person类实例对象的实例变量。注意name，gender，age访问只能读取相应实例变量，而不能改变它们的值。
+
+我们也可以用成员变量只读控制符attr_reader来达到同样的效果。
+class Person
+  attr_reader :name, :gender, :age
+end
+
+类似地，我们可以定义方法去改变成员变量的值。
+class Person
+  def name=(name)
+   @name=name
+  end
+
+  def gender=(gender)
+   @gender=gender
+  end
+
+  def age=(age)
+   @age=age
+  end
+end
+people = Person.new(‘Tom’, ‘male’, 15)
+people.name = “Henry”
+people.gender = “male”
+people.age  = 25
+
+也可以用成员变量写控制符attr_writer来达到同样的效果。
+class Person
+  attr_writer :name, :gender, :age
+end
+
+我们也可以使用attr_accessor来说明成员变量既可以读，也可以写。
+class Person
+  attr_accessor :name, :gender, :age
+end
+
+也可以使用attr控制符来控制变量是否可读写。attr 只能带一个符号参数， 第二个参数是一个 bool 参数，用于指示是否为符号参数产生写方法。它的默认值是 false，只产生读方法，不产生写方法。
+class Person
+  attr :name, true  #读写
+  attr :gender, true #读写
+  attr :age, true  #读写
+  attr :id, false      #只读
+end
+
+注意attr_reader，attr_writer，attr_accessor和attr不是语言的关键字，而是Module模块的方法。
+
+class Test
+  attr_accessor :value
+end
+puts Test.instance_methods – Test.superclass.public_methods
+
+执行结果为：
+value
+value=
+
+上面代码中，我们使用Test.instance_methods得到Test类所有的实例方法，使用Test.superclass.public_methods得到Test父类所有的实例方法，然后相减就得到Test类不包含父类的所有的实例方法。
+由于instance_methods方法返回值为一个Array，所以我们作差值运算。
+
+也可以重定义方法，重定义一个方法时，新的定义会覆盖原有的定义。
+
+下面的例子重定义类中的方法meth1，
+class Test
+  def meth1
+   puts “This is meth1″
+  end
+end
+
+a = Test.new
+a.meth1
+
+class Test
+  def meth1
+   puts “This is new meth1″
+  end
+end
+
+a. meth1
+
+执行结果为：
+This is meth1
+This is new meth1
+
+重定义同一个类时，意味着对原有定义进行补充，不会覆盖原来的定义。而重定义方法时，则会覆盖原有定义。
+
+我们可以使用self标识本身，self和Java中的this有些类似，代表当前对象。
+class Person
+def initialize(name, gender, age)
+ @name = name
+ @gender = gender
+@age = age
+end
+
+def <=>(other)
+ self.age <=> other.age
+end
+end
+
+<=> 方法通常意思为比较，返回值为-1，0或1分别表示小于，等于和大于。
+** ruby如何进行继承操作？Ruby能进行多重继承吗？
+*** < 只支持单继承，实现多继承使用mixin，super调用父类方法，省略参数时将使用当前方法的参数
+Ruby继承的语法很简单，使用 < 即可。
+
+Ruby语言只支持单继承，每一个类都只能有一个直接父类。这样避免了多继承的复杂度。但同时，Ruby提供了mixin的机制可以用来实现多继承。
+
+可以使用super关键字调用对象父类的方法，当super省略参数时，将使用当前方法的参数来进行调用。
+** 解释一下ruby中的特殊方法与特殊类？
+*** 特殊方法是指某实例所特有的方法。
+**** def obj1.singleton_method1 。。。 end
+    一个对象有哪些行为由对向所属的类决定，但是有时候，一些特殊的对象有何其他对象不一样的行为，
+    在多数程序设计语言中，例如C++和Java，我们必须定义一个新类，
+    但在Ruby中，我们可以定义只从属于某个特定对象的方法，这种方法我们成为特殊方法 (Singleton Method)。
+
+class SingletonTest
+  def info
+   puts “This is This is SingletonTest method”
+  end
+end
+
+obj1 = SingletonTest.new
+obj2 = SingletonTest.new
+
+def obj2.info
+  puts “This is obj2″
+end
+
+obj1.info
+obj2.info
+
+ 执行结果为：
+This is This is SingletonTest method
+This is obj2
+
+*** class << obj1 ... end 可以打开一个实例，定义一系列的特殊方法
+有时候，我们需要给一个对象定义一系列的特殊方法，如果按照前面的方法，那么只能一个一个定义：
+
+def obj2.singleton_method1
+end
+
+def obj2.singleton_method2
+end
+
+def obj2.singleton_method3
+end
+……
+def obj2.singleton_methodn
+end
+
+这样做非常繁复麻烦，而且无法给出一个统一的概念模型，因此Ruby提供了另外一种方法，
+class << obj
+……
+end
+
+obj是一个具体的对象实例，class << 代表它的特殊类。
+
+class SingletonTest
+  def meth1
+   puts “This is meth1″
+  end
+
+  def meth2
+   puts “This is meth2″
+  end
+end
+
+obj1 = SingletonTest.new
+obj2 = SingletonTest.new
+
+class << obj2
+  def meth1
+   puts “This is obj2′s meth1″
+  end
+
+  def meth2
+   puts “This is obj2′s meth2″
+  end
+end
+
+obj1.meth1
+obj1.meth2
+obj2.meth1
+obj2.meth2
+
+执行结果为：
+This is meth1
+This is meth2
+This is obj2′s meth1
+This is obj2′s meth2
+** Ruby中的保护方法和私有方法与一般面向对象程序设计语言的一样吗？
+*** public: 在任何地方都可以被调用，这是方法的默认存取控制。
+    除了 initialize 和 initialize_cpoy 方法， 他们永远是私有方法。
+*** protected：只能被定义该方法的类自己的对象和子类的对象访问
+*** private: 只能被对象自己访问，即使是这个类的其他对象也不能访问。
+   Ruby中的保护方法和私有方法与一般面向对象程序设计语言的概念有所区别，
+   保护方法的意思是方法只能方法只能被定义这个方法的类自己的对象和子类的对象访问，私有方法只能被对象自己访问。
+
+class Test
+ def method1    #默认为公有方法
+ …
+ end
+
+ protected  #保护方法
+ def method2
+ …
+ end
+
+ private  #私有方法
+ def method3
+ end
+
+ public
+ def test_protected(arg) #arg是Test类的对象
+  arg.method2   #正确，可以访问同类其他对象的保护方法
+ end
+
+ def test_private(arg) #arg是Test类的对象
+  arg.method3  #错误，不能访问同类其他对象的私有方法
+ end
+end
+
+obj1 = Test.new
+obj2 = Test.new
+
+obj1.test_protected(obj2)
+obj1.test_private(obj2)
+
+可以看到，和C++/Java相比，Ruby提供了更好的封装性。
+** 既然说Ruby中一切都是对象，那么Ruby中类也是对象吗？
+*** 所有类都是元类的实例对象，有自己的object_id
+   没错，类也是对象，这是Ruby和C++/Java的一个显著不同，在C++/Java中，类仅仅是一个数据抽象，并没有类也是对象这样的概念。
+而在 Ruby中存在着元类的概念，类也是对象，所有类都是元类的实例对象。和C++/Java相比，Ruby的面向对象程度更高。
+可以看到，类对象和实例对象一样有自己的ojbect_id，你可以象调用一个实例对象的方法一样去用它去调用类方法。
+所有类对象的类是Class类，Oject类是所有类的基类。
+irb(main):003:0> Object.class
+=> Class
+irb(main):004:0> Object.superclass
+=> nil
+** 介绍一下Ruby的多线程处理
+*** 用户级多线程，移植容易，但效率较低，不能使用多个CPU
+Ruby的多线程是用户级多线程，这样使得Ruby的多线程移植非常容易，你并不需关心具体的操作系统；
+这样做也使线程容易控制，程序不容易产生死锁这类严重的线程问题。
+但是同时，由于Ruby的多线程并不是真正意义上的操作系统级多线程，不管代码使用了多少个Thread类的实例，
+都只会在启动解释器这一个进程内执行，由Ruby解释器进行具体的线程切换管理，其效率要低于由操作系统管理线程的效率，且不能使用多个CPU。
+在Ruby中同时做多件事最简单的方式就是使用Thread类，Thread类提供了一种高效和轻量级的手段来同时处理多件任务。
+Thread类由Ruby解释器具体实现，提供了一种同时处理多个任务的方法， Thread类实现的并不是操作系统级多线程。
+Ruby多线程的优点和缺点同样明显，缺点是效率不如操作系统级多线程，不能使用多个CPU，但其优点也很明显，即可移植性很高。
+这就需要设计人员综合考虑。
+** Ruby如何创建一个线程？
+*** Thread.new   join
+    Thread.new方法去创建一个线程，可以随后代码块中列出线程执行的代码：
+x = Thread.new { sleep 0.1; print “x”; print “y”; print “z” }
+a = Thread.new { print “a”; print “b”; sleep 0.2; print “c” }
+
+执行结果为：
+ab
+
+上面的示例程序中使用Thread.new创建了二个线程，线程随即开始运行。但是运行结果很奇怪，为什么程序运行结果是“ab”呢？我们预期的执行结果应该是 “abxyzc”。
+当Ruby程序执行完毕的时候，他会杀掉所有的线程，不管其它的线程的运行状态如何。如果没有使用join方法，那么主程序执行完毕后会把所有没有执行完毕的线程杀掉。
+上面的实例程序中，当主程序运行完毕时，两个线程都没有运行结束就被中止掉了。我们可以使用join方法来让主程序等待某个特定线程结束，对每一个线程使用join方法，可以确保在程序结束前所有的线程可以运行完毕。
+
+x = Thread.new { sleep 0.1; print “x”; print “y”; print “z” }
+a = Thread.new { print “a”; print “b”; sleep 0.2; print “c” }
+x.join
+a.join
+
+我们使用Thread.new方法创建两个新的线程并开始运行, 然后使用join方法等待线程结束。执行结果为：
+abxyzc
+可以看到通过使用join方法等待线程结束，程序运行结果和我们预期结果相符。
+
+另一个例子：
+x = Thread.new { sleep 0.1; print “x”; print “y”; print “z” }
+a = Thread.new { sleep 0.1; print “a”; print “b”; sleep 0.2; print “c” }
+执行没有任何输出，因为主程序执行完毕杀死两个线程的时候这两个线程没有运行到输出语句。
+
+也可以给join方法添加时间用来指明最大等待时间。如果超时join返回nil。
+x = Thread.new { sleep 0.1; print “x”; print “y”; print “z” }
+a = Thread.new { sleep 0.1; print “a”; print “b”; sleep 10; print “c” }
+
+x.join(5)
+a.join(5)
+
+ 执行结果为：
+ abxyz
+
+ 上面的例子中对于每一个线程的最大等待时间是5秒，由于a线程需要执行10秒以上，所以a线程没有运行完毕程序就将返回。
+** Ruby如何进行文件操作？ 请用代码表示
+   Ruby使用File类来操作文件，
+*** File.new来创建一个File类的实例并打开这个文件。
+file = File.new(“testfile”, “r”)
+# … process the file
+file.close
+testfile是想要操作的文件名，”r”说明了文件的操作模式为读取。可以使用”w”表示写入，”rw”表示读写。
+
+最后要记得关闭打开的文件，确保所有被缓冲的数据被写入文件，所有相关的资源被释放。
+
+*** File.open来打开文件，open和new的不同是open可以使用其后的代码块而new方法则返回一个File类的实例。
+    并且open处理了异常
+File.open(“testfile”, “r”) do |file|
+# … process the file
+end
+
+open操作的另一个优点是处理了异常，如果处理一个文件发生错误抛出了
+异常的话，那么open操作会自动关闭这个文件，下面是open操作的大致实现：
+class File
+def File.open(*args)
+result = f = File.new(*args)
+if block_given?
+begin
+result = yield f
+ensure
+f.close
+end
+end
+return result
+end
+end
+
+ 对于文件的路径，Ruby会在不同的操作系统间作转换。例如，在Windows下，/ruby/sample/test.rb会被转化为\ruby\sample\test.rb。当你使用字符串表示一个Windows下的文件时，请记住使用反斜线先转义：
+ “c:\\ruby\\sample\\test.rb”
+也可以使用File::SEPARATOR表示不同系操作统的路径分割符。
+** Ruby如何实现动态方法调用？
+*** 使用send方法 “This is a dog1″.send(:length) => 14
+第一种实现动态方法调用是使用send方法，send方法在Object类中定义，方法的第一个参数是一个符号用来表示所要调用的方法，后面则是所调用方法需要的参数。
+“This is a dog1″.send(:length) => 14
+上面的代码中通过send方法去对一个字符串执行length操作，返回字符串的长度。
+
+class TestClass
+ def hello(*args)
+  ”Hello ” + args.join(‘ ‘)
+ end
+end
+
+a = TestClass.new
+puts a.send :hello, “This”, “is”, “a”, “dog!”
+
+执行结果为：
+Hello This is a dog!
+
+*** 使用Method类和UnboundMethod类  k = Test.new(10); m = k.method(:hello); m.call
+另一种实现动态方法调用是使用Object类的method方法，这个方法返回一个Method类的对象。我们可以使用call方法来执行方法调用。
+test1 = “This is a dog1″.method(:length)
+test1.call  => 14
+
+class Test
+ def initialize(var)
+  @var = var
+ end
+
+ def hello()
+  ”Hello, @var = #{@var}”
+ end
+end
+
+k = Test.new(10)
+m = k.method(:hello)
+m.call   #=> “Hello, @iv = 99″
+
+l = Test.new(‘Grant’)
+m = l.method(“hello”)
+m.call   #=> “Hello, @iv = Fred”
+
+可以在使用对象的任何地方使用method对象，当调用call方法时，参数所指明的方法会被执行，这种行为有些像Ｃ语言中的函数指针。
+你也可以把method对象作为一个迭代器使用。
+def square(a)
+ a*a
+end
+
+mObj = method(:square)
+[1, 2, 3, 4].collect(&mObj)  =>　[1 4 9 16]
+
+Method对象都是和某一特定对象绑定的，也就是说你需要通过某一对象使用Method对象。
+你也可以通过UnboundMethod类创建对象，然后再把它绑定到某个具体的对象中。如果UnboundMethod对象调用时尚未绑定，则会引发异常。
+class Double
+ def get_value
+  2 * @side
+ end
+
+  def initialize(side)
+   @side = side
+  end
+end
+
+a = Double.instance_method(:get_value) #返回一个UnboundMethod对象
+s = Double.new(50)
+b = a.bind(s)
+puts b.call
+
+执行结果为：
+100
+
+看下面一个更具体的例子：
+class CommandInterpreter
+def do_2() print “This is 2\n”; end
+ def do_1() print “This is 1\n”; end
+ def do_4() print “This is 4\n”; end
+ def do_3() print “This is 3\n”; end
+
+ Dispatcher = {
+   ?2 => instance_method(:do_2),
+   ?1 => instance_method(:do_1),
+   ?4 => instance_method(:do_4),
+   ?3 => instance_method(:do_3)
+ }
+
+ def interpret(string)
+   string.each_byte {|i| Dispatcher[i].bind(self).call }
+  end
+end
+
+interpreter = CommandInterpreter.new
+interpreter.interpret(’1234′)
+
+执行结果为：
+This is 1
+This is 2
+This is 3
+This is 4
+
+*** 使用eval方法 puts eval('DateTime.now()');  puts eval(“@value”, binding2)  #=> Binding Test
+我们还可以使用eval方法实现方法动态调用。eval方法在Kernel模块中定义，有多种变体如class_eval，module_eval，instance_eval等。
+Eval方法将分析其后的字符串参数并把这个字符串参数作为Ruby代码执行。
+str = “Hello”
+eval “str + ‘ World!’” => Hello World!
+
+sentence = %q{“This is a test!”.length}
+eval sentence => 15
+当我们在使用eval方法时，我们可以通过eval方法的第二个参数指明eval所运行代码的上下文环境，这个参数可以是Binding类对象或Proc类对象。
+Binding类封装了代码在某一环境运行的上下文，可以供以后使用。
+class BindingTest
+ def initialize(n)
+   @value = n
+ end
+
+ def getBinding
+   return binding() #使用Kernel#binding方法返回一个Binding对象
+  end
+end
+
+obj1 = BindingTest.new(10)
+binding1 = obj1.getBinding
+obj2 = BindingTest.new(“Binding Test”)
+binding2 = obj2.getBinding
+
+puts eval(“@value”, binding1)  #=> 10
+puts eval(“@value”, binding2)  #=> Binding Test
+puts eval(“@value”)     #=> nil
+
+可以看到上述代码中，@value在binding1所指明的上下文环境中值为10，在binding2所指明的上下文环境中值为Binding Test。
+当eval方法不提供binding参数时，在当前上下文环境中@value并未定义，值为nil。
+
+** ruby中的元类
+在Ruby中一切都是对象。类和实例对象都是对象。这句话听起来有点拗口，让我们来看一个例子：
+
+class Person
+
+def initialize(name, gender, age)
+
+@name = name
+
+@gender = gender
+
+@age = age
+
+end
+
+end
+
+a = Person.new('Tom', 'male', 15)
+
+puts a.object_id => 22429840
+
+puts Person.object_id => 22429960
+
+没错，类也是对象，这是Ruby和C++/Java的一个显著不同，在C++/Java中，类仅仅是一个数据抽象，并没有类也是对象这样的概念。而在Ruby中存在着元类的概念，类也是对象，所有类都是元类的实例对象。和C++/Java相比，Ruby的面向对象程度更高。
+
+可以看到，类对象和实例对象一样有自己的ojbect_id，你可以象调用一个实例对象的方法一样去用它去调用类方法。所有类对象的类是Class类，Oject类是所有类的基类。
+
+irb(main):003:0> Object.class
+
+=> Class
+
+irb(main):004:0> Object.superclass
+
+=> nil
+
+这样，我们可以从另一个角度去理解类变量与类方法，类变量就是一个类对象的实例变量，类方法就是指一个类对象类的特殊方法。
+
+类方法具体可分为两种：第一种是在所有的类的父类Class中定义的，且被所有的类所共享的方法；第二种是各个类所特有的特殊方法。
+
+类方法中的self指的是类本身，这点需要牢记，这样我们可以使用多种方式定义类方法。
+
+class Test
+
+#定义类方法方式1
+
+def Test.meth1
+
+# ...
+
+end
+
+#定义类方法方式2
+
+def self.meth2
+
+# ...
+
+end
+
+#定义类方法方式3
+
+class << Test
+
+def meth3
+
+# ...
+
+end
+
+end
+
+#定义类方法方式4
+
+class << self
+
+def meth4
+
+# ...
+
+end
+
+end
+
+end
+** 算法
+$temp=$arr[j];$arr[j]=$arr[j-1];$arr[j-1]=$temp
+
+ugly, ugly, ugly !
+
+The ruby way:
+
+$arr[j], $arr[j-1] = $arr[j-1], $arr[j]
+
+dito, "$temp=$arr1[i];$arr1[i]=$arr1[j];$arr1[j]=$temp" to:
+
+$arrl[i], $arrl[j] = $arrl[j], $arrl[i]
+
+   1. $arr=[8,3,1,2,5]   #定义全局数组，用于冒泡排序
+   2. $arr1=[9,6,7,1,4]  #定义全局数组，用于选择排序
+   3. $arr2=[10,25,7,2,5,1,30,28,21]   #定义全局数组，用于插入排序
+   4. $temp=0     #全局变量，用于交换数字
+   5.
+   6. #冒泡排序
+   7. puts "冒泡排序\n"
+   8. =begin
+   9.     upto循环控制冒泡次数
+  10.     downto循环控制每次比较的次数
+  11. =end
+  12. 1.upto(4){ |i|
+  13.  4.downto(i){|j| ($temp=$arr[j];$arr[j]=$arr[j-1];$arr[j-1]=$temp)  if $arr[j]<$arr[j-1]}
+  14. }
+  15. #用,将每个元素连接起来进行输出
+  16. print $arr.join(","),"\n"
+  17.
+  18.
+  19. #选择排序
+  20. puts "\n选择排序\n"
+  21. =begin
+  22.   外层upto循环选定每次待比较的元素
+  23.   内层upto循环控制比较的元素
+  24. =end
+  25. 0.upto(3){
+  26. |i| (i+1).upto(4){ |j|
+  27.   ($temp=$arr1[i];$arr1[i]=$arr1[j];$arr1[j]=$temp;) if $arr1[j]<$arr1[i]
+  28. }
+  29. }
+  30.
+  31. print $arr1.join(","),"\n"
+  32.
+  33. #插入排序
+  34. puts "\n插入排序\n"
+  35. =begin
+  36.       本人觉得冒泡排序其实是所有排序的一个根本出发点。。。
+  37.       无言选择几次，插入几次，最终都是将最小的数组长度-1个元素给放到最
+  38.       前面就搞定了。。。当然插入排序是最难的，花了点时间
+  39.       第一个upto循环控制比较的次数。。。
+  40. 第二个upto循环开始比较，一旦发现比前面一个元素小，就停止此循环，同时记录这个元素用其下标，转向第三个upto循环依次向后挪位置就可以了，当然第一次挪位置后就要跳出来，不能再循环了。。。
+  41. =end
+  42. $num=0
+  43. $index=0
+  44. f=false
+  45. 0.upto($arr2.length-1){
+  46. |i| (i+1).upto($arr2.length-1){
+  47.   |j| (f=true;$num=$arr2[j];$index=j;break) if $arr2[j]<$arr2[i]
+  48. }
+  49. if f then
+  50. 0.upto($index-1){
+  51.   |n| ( ($index-1).downto(n){|m| $arr2[m+1]=$arr2[m] }; $arr2[n]=$num;break;) if $arr2[n]>$num
+  52. }
+  53. f=false
+  54. end
+  55. }
+  56.
+  57. print $arr2.join(","),"\n"
+
