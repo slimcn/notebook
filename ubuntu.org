@@ -534,7 +534,7 @@ none /proc/bus/usb usbfs devgid=1002,devmode=774 0 0
 **** bash < <(curl -s https://rvm.beginrescueend.com/install/rvm)
 **** mkdir -p ~/.rvm/src/ && cd ~/.rvm/src && rm -rf ./rvm/ && git clone --depth 1 git://github.com/wayneeseguin/rvm.git && cd rvm && ./install
 Initialized empty Git repository in /home/sjm/.rvm/src/rvm/.git/
-
+**** echo '[[ -s "/usr/local/rvm/scripts/rvm" ]] && . "/usr/local/rvm/scripts/rvm" # Load RVM function' >> ~/.bash_profil
 * tips
 ** install
 ** rails 尚未安装 path更新
